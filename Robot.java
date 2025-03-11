@@ -29,31 +29,25 @@ import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.controls.compound.Diff_DutyCycleOut_Position;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.InvertedValue;
-
 public class Robot extends TimedRobot {
   private static final String kDefaultAuto = "Center";
   private static final String kCustomAuto = "Red Amp Side";
   private static final String kCustomAuto2 = "Blue Amp Side";
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
-
 //controllers
   private DifferentialDrive m_myRobot;
   private Joystick m_Driver; //driver controller
   private Joystick m_Elevator; //Elevator controller
-  
   //motor ID #s
-  private static final int leftFrontDriveID = 4;
-  private static final int leftRearDriveID = 2;
   private static final int rightFrontDriveeID = 1;
+  private static final int leftRearDriveID = 2;
   private static final int rightRearDriveID = 3;
+  private static final int leftFrontDriveID = 4;
   private static final int ElevatorID = 5;
-  //private static final int armPivotRightID = 6;
-  //private static final int intakeShootBottomID = 8;
-  //private static final int intakeShootTopID = 7;
-  //private static final int intake = 9;
-  //private static final int climberID = 10;
-
+  private static final int intakeBottomID = 8;
+  private static final int intakeTopID = 7;
+  private static final int climberID = 10;
   //kraken motors
   private final TalonFX m_leftFront = new TalonFX(leftFrontDeviceID);
   private final TalonFX m_leftRear = new TalonFX(leftRearDeviceID);
@@ -62,15 +56,12 @@ public class Robot extends TimedRobot {
   private final DutyCycleOut leftOut = new DutyCycleOut(0);
   private final DutyCycleOut rightOut = new DutyCycleOut(0);
   private final CurrentLimitsConfigs m_currentLim = new CurrentLimitsConfigs();
-
   //neo motors
   private CANSparkMax m_Elevator;
-  //private CANSparkMax m_armPivotRight;
-  //private CANSparkMax m_intakeShootBottom;
-  //private CANSparkMax m_intakeShootTop;
-  //private CANSparkMax m_intake;
-  //private CANSparkMax m_climber;
-
+  private CANSparkMax m_intakeBottom;
+  private CANSparkMax m_intakeTop;
+  private CANSparkMax m_intake;
+  private CANSparkMax m_climber;
   static final DutyCycleEncoder encoder = new DutyCycleEncoder(0); //pivot encoder
   DigitalInput laser = new DigitalInput(4);
   static final double kP = 0;
@@ -78,8 +69,6 @@ public class Robot extends TimedRobot {
   static final double kD = 0;
   PIDController pid = new PIDController(kP, kI, kD);
   DigitalInput laser2 = new DigitalInput(6);
-
-  
   @Override
   public void robotInit() {
     m_chooser.setDefaultOption("Center", kDefaultAuto);
@@ -101,13 +90,12 @@ public class Robot extends TimedRobot {
     m_leftFront.setSafetyEnabled(true);
     m_rightFront.setSafetyEnabled(true);
     
-    //arm setup
+    //Elevator setup
     m_Elevator = new CANSparkMax(ElevatorID, MotorType.kBrushless);
-   // m_armPivotRight = new CANSparkMax(armPivotRightID, MotorType.kBrushless);
-    //m_intakeShootBottom = new CANSparkMax(intakeShootBottomID, MotorType.kBrushless);
-    //m_intakeShootTop = new CANSparkMax(intakeShootTopID, MotorType.kBrushless);
-    //m_intake = new CANSparkMax(intake, MotorType.kBrushless);
-    //m_climber = new CANSparkMax(climberID, MotorType.kBrushless);
+    m_intakeBottom = new CANSparkMax(intakeBottomID, MotorType.kBrushless);
+    m_intakeTop = new CANSparkMax(intakeTopID, MotorType.kBrushless);
+    m_intake = new CANSparkMax(intake, MotorType.kBrushless);
+    m_climber = new CANSparkMax(climberID, MotorType.kBrushless);
 
     //robot setup
     m_myRobot = new DifferentialDrive(m_leftFront, m_rightFront);
@@ -127,48 +115,28 @@ public class Robot extends TimedRobot {
   }
 
    //motor vars
-   static boolean intakeOn = false; //whether the intake is running, false = off
-   static boolean shootOn = false; //whether the shooter motors are running, false = off
-   static double shooterSpeed = 0.5; //the speed the shooters are running
-   static boolean intakeMode = false; //whether the intake is in shoot mode or pickup mode, false = pickup mode
-   static boolean ampShoot = false; //whether we are running the amp shot, false = off
+   static boolean intakeOn = false;
+   static boolean intakeMode = false;
    static int climber = 2; //if the climber is moving, 0 = up, 1 = down, 2 = home 
    static double climberHome; //sets the home position of the climber
    private RelativeEncoder climberEncoder; //the climber encoder
-   //static boolean turboSpeed = false; //run the drive train faster, false = off
-   static int pivotDirection = 2; //determines the arm movement, 0 = up, 1 = down, 2 = no movement
    static double fwd;//drivetrain forward var
    static double rot;//drivetrain rotation var
 
-   //arm motor controller and intake/shooter control
+   //Elevator motor controller
    public void setElevator(double percent){
     m_Elevator.set(percent);
-    //m_armPivotRight.set(percent);
 
-    //if(intakeOn == true){//intake setting
-      //if(intakeMode == false){ //sucky uppy
-        //m_intake.set(0.2);
-      //}else if(intakeMode == true){ //shoot mode
-        //m_intake.set(1);
-      //}
-    //}else{
-      //m_intake.set(0);
-    //}
+    if(intakeOn == true){//intake setting
+      if(intakeMode == false){ //sucky uppy
+        m_intake.set(0.2);
+      }else if(intakeMode == true){ //shoot mode
+        m_intake.set(1);
+      }
+    }else{
+      m_intake.set(0);
+    }
     
-    //if(ampShoot == true){ //amp shooting
-      //m_intakeShootTop.set(0.2);
-      //m_intakeShootBottom.set(0.2);
-      //m_intake.set(0.2);
-    //}else{
-      //m_intakeShootTop.set(0);
-      //m_intakeShootBottom.set(0);
-    //}
-
-    //if(shootOn == true){//are we shooting
-      //m_intakeShootTop.set(shooterSpeed);
-      //m_intakeShootBottom.set(shooterSpeed);
-    //}
-  }
 
   @Override
   public void robotPeriodic() {}
@@ -190,7 +158,7 @@ public class Robot extends TimedRobot {
   int step;
 
   //8.46 gear ratio
-  //18.84 inches per rev
+  //18.84 inches per revolution
   public void setDist(int right, int left){
     posTargetRight = ((right/18.84)*8.46) + lastRight;
     posTargetLeft = ((left/18.84)*8.46) + lastLeft;
@@ -205,19 +173,6 @@ public class Robot extends TimedRobot {
       leftSpeed = -(left/var);
       rightSpeed = -(right/var);
     }
-
-    if(laser.get() == laser2.get()){
-          if(laser.get() == false){
-            intakeOn = false;
-            setArmMotor(0);
-          }else{
-            setArmMotor(0);
-            intakeOn = true;
-          }
-        }else{
-          intakeOn = true;
-        }
-
     if(rightPos >= posTargetRight){
       rightSpeed = 0;
     }else{
@@ -292,19 +247,19 @@ public class Robot extends TimedRobot {
     lastLeft = 0;
     lastRight = 0;
   }
-
+//EVERYTHING BELOW THIS IS OVERRIDE
   /** This function is called periodically during autonomous. */
   @Override
   public void autonomousPeriodic() {
-    timeRun = Timer.getFPGATimestamp() - autoTimeStart;
+    //timeRun = Timer.getFPGATimestamp() - autoTimeStart;
 
-    m_autoSelected = m_chooser.getSelected();
+    //m_autoSelected = m_chooser.getSelected();
 
-    leftPos = m_leftFront.getPosition().getValue();
-    rightPos = m_rightFront.getPosition().getValue();
+    //leftPos = m_leftFront.getPosition().getValue();
+    //rightPos = m_rightFront.getPosition().getValue();
 
-    if(m_autoSelected == "Center"){
-      if(step == 0){//arm to shoot pos and spin up motors
+    //if(m_autoSelected == "Center"){
+      //if(step == 0){//arm to shoot pos and spin up motors
         if(encoder.getAbsolutePosition() < 0.9){
           setArmMotor(-0.3);
         }else if(encoder.getAbsolutePosition() < 0.95){
@@ -374,12 +329,12 @@ public class Robot extends TimedRobot {
             nextStep();
           }
         }
-      }else if(step == 6){//
+      }else if(step == 6){
         setDist(40,40);
         intakeOn = false;
         intakeMode = false;
       }
-    }
+    
     
     if(m_autoSelected == "Red Amp Side"){
       if(step == 0){//arm to shoot pos and spin up motors
@@ -549,145 +504,84 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
 
   @Override
-  public void teleopPeriodic() {
-    SmartDashboard.putNumber("Pivot Read Out", encoder.getAbsolutePosition()); //read out encoder pos
-    SmartDashboard.putNumber("Climb", climberEncoder.getPosition());
-    SmartDashboard.putBoolean("Laser", laser.get());
-    SmartDashboard.putBoolean("Laser2", laser2.get());
-    SmartDashboard.putNumber("Shooter", shooterSpeed);
-
-    climberPos = climberEncoder.getPosition();
-
+  public void teleopPeriodic() 
+    //SmartDashboard.putNumber("Pivot Read Out", encoder.getAbsolutePosition()); //read out encoder pos
+    //SmartDashboard.putNumber("Climb", climberEncoder.getPosition());
+    //SmartDashboard.putBoolean("Laser", laser.get());
+    //SmartDashboard.putBoolean("Laser2", laser2.get());
+    //SmartDashboard.putNumber("Shooter", shooterSpeed);
+    //climberPos = climberEncoder.getPosition();
     //kraken stuff
-    leftOut.Output = fwd + rot;
-    rightOut.Output = fwd - rot;
-    m_leftFront.setControl(leftOut);
-    m_rightFront.setControl(rightOut);
-
+    //leftOut.Output = fwd + rot;
+    //rightOut.Output = fwd - rot;
+    //m_leftFront.setControl(leftOut);
+    //m_rightFront.setControl(rightOut);
     //drive mode
-    if(m_Driver.getRawButton(6)){//nitrous active
-      fwd = -m_Driver.getY()*.35;
-      rot = m_Driver.getX()*0.3;
-    }else{//regular mode
-      fwd = -m_Driver.getY()*0.25;
-      rot = m_Driver.getX()*0.2;
-    }
-
-    //arm manual direction set
-    if(m_Arm.getY() > 0.06 ){
-      pivotDirection = 0;
-    }else if(m_Arm.getY() < -0.06){
-      pivotDirection = 1;
-    }else{
-      pivotDirection = 2;
-    }
-
-    //amp shoot
-    if(m_Arm.getRawButton(2)){
-      ampShoot = true;
-    }else{
-      ampShoot = false;
-    }
-
+    //if(m_Driver.getRawButton(6)){//nitrous active
+      //fwd = -m_Driver.getY()*.35;
+      //rot = m_Driver.getX()*0.3;
+    //}else{//regular mode
+      //fwd = -m_Driver.getY()*0.25;
+      //rot = m_Driver.getX()*0.2;
+    //}
     //intake note
-    if(m_Arm.getRawButton(1)){
-      if(laser.get() == laser2.get()){
-        if(laser.get() == false){
-          intakeOn = false;
-        }else{
-          intakeOn = true;
-        }
-      }else{
-        intakeOn = true;
-      }
-    }else{
-      intakeOn = false;
-    }
-
+    //if(m_Arm.getRawButton(1)){
+      //if(laser.get() == laser2.get()){
+        //if(laser.get() == false){
+          //intakeOn = false;
+        //}else{
+          //intakeOn = true;
+        //}
+      //}else{
+        //intakeOn = true;
+      //}
+    //}else{
+      //intakeOn = false;
+    //}
     //shoot spinup
-    if(m_Arm.getRawButton(5)){
-      shootOn = true;
-    }else{
-      shootOn = false;
-    }
+    //if(m_Arm.getRawButton(5)){
+      //shootOn = true;
+    //}else{
+      //shootOn = false;
+    //}
 
-    if(m_Arm.getRawButton(3)){ //e-shoot
-      shooterSpeed = 0.7;
-    }else{
-      shooterSpeed = 0.5;
-    }
-
+    //if(m_Arm.getRawButton(3)){ //e-shoot
+      //shooterSpeed = 0.7;
+    //}else{
+      //shooterSpeed = 0.5;
+    //}
     //shoot the note
-    if(m_Arm.getRawButton(6)){
-      if(shootOn == true){
-        intakeMode = true;
-        intakeOn = true;
-      }  
-    }else{
-      intakeMode = false;
-    }
-
+    //if(m_Arm.getRawButton(6)){
+      //if(shootOn == true){
+        //intakeMode = true;
+        //intakeOn = true;
+      //}  
+    //}else{
+      //intakeMode = false;
+    //}
     //climbing control
-    if(m_Arm.getX() > 0.06 ){
-      climber = 0;
-    }else if(m_Arm.getX() < -0.06){
-      climber = 1;
-    }else{
-      climber = 2;
-    }
-
-    if(climber == 0){
-      if(climberEncoder.getPosition() > 152){
-        m_climber.set(0);
-      }else{
-        m_climber.set(1);
-      }
-    }else if(climber == 1){
-      if(climberEncoder.getPosition() < -85){
-        m_climber.set(0);
-      }else{
-        m_climber.set(-1);
-      }
-    }else{
-      m_climber.set(0);
-    }
-
-    //manual arm control
-    if(pivotDirection == 0){
-      if(encoder.getAbsolutePosition() > 0.79){
-        setArmMotor(m_Arm.getY()*0.5);
-      }else if(encoder.getAbsolutePosition() > 0.74){
-        setArmMotor(0.15);
-      }else if(encoder.getAbsolutePosition() <= 0.74){
-        setArmMotor(0);
-      }  
-    }else if(pivotDirection == 1){
-      if(encoder.getAbsolutePosition() < 0.96){
-        setArmMotor(m_Arm.getY()*0.5);
-      }else if(encoder.getAbsolutePosition() < 0.988){
-        setArmMotor(-0.15);
-      }else if(encoder.getAbsolutePosition() >= 0.988){
-        setArmMotor(0);
-      }  
-    }else if(m_Arm.getRawButton(4)){//arm setpoint, negative = down
-      if(encoder.getAbsolutePosition() < 0.9){
-        setArmMotor(-0.2);
-      }else if(encoder.getAbsolutePosition() < 0.95){
-        setArmMotor(-0.1);
-      }else if(encoder.getAbsolutePosition() >= 0.95){
-        if(encoder.getAbsolutePosition() >= 0.97){
-          setArmMotor(0.15);
-        }else{
-          setArmMotor(0.05);
-        }
-      }else{
-        setArmMotor(0);
-      }
-    }else{
-      setArmMotor(0);
-    }
-  }
-
+    //if(m_Arm.getX() > 0.06 ){
+      //climber = 0;
+    //}else if(m_Arm.getX() < -0.06){
+      //climber = 1;
+    //}else{
+     // climber = 2;
+    //}
+    //if(climber == 0){
+      //if(climberEncoder.getPosition() > 152){
+        //m_climber.set(0);
+      //}else{
+        //m_climber.set(1);
+      //}
+    //}else if(climber == 1){
+      //if(climberEncoder.getPosition() < -85){
+        //m_climber.set(0);
+      //}else{
+        //m_climber.set(-1);
+      //}
+    //}else{
+      //m_climber.set(0);
+    //}
   /** This function is called once when the robot is disabled. */
   @Override
   public void disabledInit() {}
