@@ -145,24 +145,24 @@ public class Robot extends TimedRobot {
   public void robotPeriodic() {}
 
   //auton vars
-  double autoTimeStart; //the time auton is started
-  double timeRun; //the time auton has run
-  double stepTime; //the time the last step stopped
+  //double autoTimeStart; //the time auton is started
+  //double timeRun; //the time auton has run
+  //double stepTime; //the time the last step stopped
 
-  double posTargetLeft;
-  double posTargetRight;
-  double leftPos;
-  double rightPos;
-  double var;
-  double leftSpeed; //sets the left speed
-  double rightSpeed; //sets the right speed
-  double lastLeft;
-  double lastRight;
-  int step;
+  //double posTargetLeft;
+  //double posTargetRight;
+  //double leftPos;
+  //double rightPos;
+  //double var;
+  //double leftSpeed; //sets the left speed
+  //double rightSpeed; //sets the right speed
+  //double lastLeft;
+  //double lastRight;
+  //int step;
 
   //8.46 gear ratio
   //18.84 inches per revolution
-  public void setDist(int right, int left) {
+ /*  public void setDist(int right, int left) {
     posTargetRight = ((right/18.84)*8.46) + lastRight;
     posTargetLeft = ((left/18.84)*8.46) + lastLeft;
 
@@ -237,8 +237,8 @@ public class Robot extends TimedRobot {
     step = step + 1;
     stepTime = Timer.getFPGATimestamp() - stepTime;
   }
-
-  @Override
+ */
+  /* @Override
   public void autonomousInit() {
     System.out.println("Auto selected: " + m_autoSelected);
     autoTimeStart = Timer.getFPGATimestamp();
@@ -249,7 +249,7 @@ public class Robot extends TimedRobot {
     step = 0;
     lastLeft = 0;
     lastRight = 0;
-  }
+  } */
 //EVERYTHING BELOW THIS IS OVERRIDE
   /** This function is called periodically during autonomous. */
   @Override
