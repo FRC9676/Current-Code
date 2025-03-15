@@ -1,3 +1,5 @@
+To run code: ctrl-shift-p in VS and select build code. connect to robot. ctrl-shift-p in VS and select deploy code.
+
 Change multipliers (*) at line 283 to adjust drive speed.
 
 Elevators currently just manual from second controller left joystick (line 334). 
