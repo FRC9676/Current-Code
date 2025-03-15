@@ -46,9 +46,9 @@ public class Robot extends TimedRobot {
   private static final int rightRearDriveID = 3;
   private static final int leftFrontDriveID = 4;
   private static final int ElevatorID = 5;
-  private static final int intakeBottomID = 8;
+  private static final int intakeBottomID = 6;
   private static final int intakeTopID = 7;
-  private static final int climberID = 10;
+  //private static final int climberID = 10;
   //kraken motors
   private final TalonFX m_leftFront = new TalonFX(leftFrontDriveID);
   private final TalonFX m_leftRear = new TalonFX(leftRearDriveID);
@@ -62,7 +62,7 @@ public class Robot extends TimedRobot {
   private SparkMax m_intakeBottom;
   private SparkMax m_intakeTop;
   private SparkMax m_intake;
-  private SparkMax m_climber;
+  //private SparkMax m_climber;
 
   static final DutyCycleEncoder encoder = new DutyCycleEncoder(0); //pivot encoder
   DigitalInput laser = new DigitalInput(4);
@@ -98,7 +98,7 @@ public class Robot extends TimedRobot {
     m_intakeBottom = new SparkMax(intakeBottomID, MotorType.kBrushless);
     m_intakeTop = new SparkMax(intakeTopID, MotorType.kBrushless);
     //m_intake = new SparkMax(intake, MotorType.kBrushless);
-    m_climber = new SparkMax(climberID, MotorType.kBrushless);
+    //m_climber = new SparkMax(climberID, MotorType.kBrushless);
 
     //robot setup
     m_myRobot = new DifferentialDrive(m_leftFront::set, m_rightFront::set);
@@ -106,7 +106,7 @@ public class Robot extends TimedRobot {
     //driver channel stuff
     j_Driver = new Joystick(0);
     j_Elevator = new Joystick(1);
-    j_Driver.setXChannel(4);
+    j_Driver.setXChannel(2);
     j_Driver.setYChannel(1);
     j_Elevator.setXChannel(5);
 
@@ -120,14 +120,14 @@ public class Robot extends TimedRobot {
    //motor vars
    static boolean intakeOn = false;
    static boolean intakeMode = false;
-   static int climber = 2; //if the climber is moving, 0 = up, 1 = down, 2 = home 
-   static double climberHome; //sets the home position of the climber
-   private RelativeEncoder climberEncoder; //the climber encoder
+   static int elevator_preset = 0; //0 = home, 1 = coral tray, 2 = reef lvl1, 3 = reef lvl2, 4 = reef lvl3  
+   static double elevatorHome; //sets the home position of the elevator
+   private RelativeEncoder elevatorEncoder; //the elevator encoder
    static double fwd;//drivetrain forward var
    static double rot;//drivetrain rotation var
 
-   //Elevator motor controller
-   public void setElevator(double percent){
+   //Intake motor controller
+   /* public void setIntake(double percent){
     m_Elevator.set(percent);
 
     if(intakeOn == true){//intake setting
@@ -139,7 +139,7 @@ public class Robot extends TimedRobot {
     }else{
       m_intake.set(0);
     }
-  }
+  } */
 
   @Override
   public void robotPeriodic() {}
@@ -253,16 +253,18 @@ public class Robot extends TimedRobot {
 //EVERYTHING BELOW THIS IS OVERRIDE
   /** This function is called periodically during autonomous. */
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() {
+    
+  }
    
-  double climberPos;
+  double elevatorPos;
 
   /** This function is called once when teleop is enabled. */
   @Override
   public void teleopInit() {
     //encoder.reset();
-    climberEncoder = m_climber.getEncoder();
-    climberHome = climberEncoder.getPosition();
+    elevatorEncoder = m_Elevator.getEncoder();
+    elevatorHome = elevatorEncoder.getPosition();
   }
 
   /** This function is called periodically during operator control. */
@@ -270,13 +272,17 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() { 
     SmartDashboard.putNumber("Pivot Read Out", encoder.get()); //read out encoder pos
-    //SmartDashboard.putNumber("Climb", climberEncoder.get());
+    SmartDashboard.putNumber("Elevator", elevatorEncoder.getPosition());
+    SmartDashboard.putNumber("Y", -j_Driver.getY());
+    SmartDashboard.putNumber("X", -j_Driver.getX());
     //SmartDashboard.putBoolean("Laser", laser.get());
     //SmartDashboard.putBoolean("Laser2", laser2.get());
     //SmartDashboard.putNumber("Shooter", shooterSpeed);
-    //climberPos = climberEncoder.getPosition();
+    elevatorPos = elevatorEncoder.getPosition();
     //kraken stuff
-    leftOut.Output = fwd + rot;
+    m_myRobot.arcadeDrive(-j_Driver.getY()*.25, -j_Driver.getX()*.25);
+
+    /* //leftOut.Output = fwd + rot;
     rightOut.Output = fwd - rot;
     m_leftFront.setControl(leftOut);
     m_rightFront.setControl(rightOut);
@@ -287,7 +293,7 @@ public class Robot extends TimedRobot {
     }else{//regular mode
       fwd = -j_Driver.getY()*0.25;
       rot = j_Driver.getX()*0.2;
-    }
+    } */
     //intake note
     //if(m_Arm.getRawButton(1)){
       //if(laser.get() == laser2.get()){
@@ -323,29 +329,65 @@ public class Robot extends TimedRobot {
     //}else{
       //intakeMode = false;
     //}
-    //climbing control
-    //if(m_Arm.getX() > 0.06 ){
-      //climber = 0;
-    //}else if(m_Arm.getX() < -0.06){
-      //climber = 1;
-    //}else{
-     // climber = 2;
-    //}
-    //if(climber == 0){
-      //if(climberEncoder.getPosition() > 152){
-        //m_climber.set(0);
-      //}else{
-        //m_climber.set(1);
-      //}
-    //}else if(climber == 1){
-      //if(climberEncoder.getPosition() < -85){
-        //m_climber.set(0);
-      //}else{
-        //m_climber.set(-1);
-      //}
-    //}else{
-      //m_climber.set(0);
+    //elevator control
+    //m_Elevator.set(0);
+    m_Elevator.set(-j_Elevator.getY()*.25);
+
+    //button mappings based on https://github.com/mandlifrc/GearsBotF310
+    //HOPE THEY WORK!!!!!!!!!!
+    /* if(j_Elevator.getRawButton(3)){
+      elevator_preset = 1;
+    }else if(j_Elevator.getRawButton(1)){
+      elevator_preset = 2;
+    }else if(j_Elevator.getRawButton(2)){
+      elevator_preset = 3;
+    }else if(j_Elevator.getRawButton(4)){
+      elevator_preset = 4;
+    }else{
+      elevator_preset = 0;
     }
+    if(elevator_preset == 0){
+      if(elevatorEncoder.getPosition() > -30){
+        m_Elevator.set(-1);
+      }else{
+        m_Elevator.set(0);
+      }
+    }else if(elevator_preset == 1){
+      if(elevatorEncoder.getPosition() < -15){
+        m_Elevator.set(1);
+      }else if(elevatorEncoder.getPosition() > -15){
+        m_Elevator.set(-1);
+      }else{
+        m_Elevator.set(0);
+      }
+    }else if(elevator_preset == 2){
+      if(elevatorEncoder.getPosition() < 4){
+        m_Elevator.set(1);
+      }else if(elevatorEncoder.getPosition() > 4){
+        m_Elevator.set(-1);
+      }else{
+        m_Elevator.set(0);
+      }
+    }else if(elevator_preset == 3){
+      if(elevatorEncoder.getPosition() < 23){
+        m_Elevator.set(1);
+      }else if(elevatorEncoder.getPosition() > 23){
+        m_Elevator.set(-1);
+      }else{
+        m_Elevator.set(0);
+      }
+    }else if(elevator_preset == 4){
+      if(elevatorEncoder.getPosition() < 42){
+        m_Elevator.set(1);
+      }else if(elevatorEncoder.getPosition() > 42){
+        m_Elevator.set(-1);
+      }else{
+        m_Elevator.set(0);
+      }
+    }else{
+      m_Elevator.set(0);
+    } */
+  }
   /** This function is called once when the robot is disabled. */
   @Override
   public void disabledInit() {}
