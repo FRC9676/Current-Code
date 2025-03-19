@@ -97,7 +97,7 @@ public class Robot extends TimedRobot {
     m_Elevator = new SparkMax(ElevatorID, MotorType.kBrushless);
     m_intakeBottom = new SparkMax(intakeBottomID, MotorType.kBrushless);
     m_intakeTop = new SparkMax(intakeTopID, MotorType.kBrushless);
-    m_intake = new SparkMax(intake, MotorType.kBrushless);
+    //m_intake = new SparkMax(intake, MotorType.kBrushless);
     //m_climber = new SparkMax(climberID, MotorType.kBrushless);
 
     //robot setup
@@ -112,8 +112,8 @@ public class Robot extends TimedRobot {
 
     //kraken limits
     m_currentLim.SupplyCurrentLimit = 1;
-    m_currentLim.SupplyCurrentThreshold = 4;
-    m_currentLim.SupplyTimeThreshold = 1.0;
+   // m_currentLim.SupplyCurrentThreshold = 4;
+    //m_currentLim.SupplyTimeThreshold = 1.0;
     m_currentLim.StatorCurrentLimitEnable = true;
   }
 
@@ -126,7 +126,7 @@ public class Robot extends TimedRobot {
    static double fwd;//drivetrain forward var
    static double rot;//drivetrain rotation var
 
-    Intake motor controller
+    //Intake motor controller
     public void setIntake(double percent){
     m_Elevator.set(percent);
 
@@ -190,8 +190,8 @@ public class Robot extends TimedRobot {
     if(leftSpeed == 0){
       if(rightSpeed == 0){
         step = step + 1;
-        lastRight = m_rightFront.getPosition().getValue();
-        lastLeft = m_leftFront.getPosition().getValue();
+        //lastRight = m_rightFront.getPosition().getValue();
+        //lastLeft = m_leftFront.getPosition().getValue();
         stepTime = Timer.getFPGATimestamp() - stepTime;
       }
     }
@@ -226,8 +226,8 @@ public class Robot extends TimedRobot {
     if(leftSpeed == 0){
       if(rightSpeed == 0){
         step = step + 1;
-        lastRight = m_rightFront.getPosition().getValue();
-        lastLeft = m_leftFront.getPosition().getValue();
+        //lastRight = m_rightFront.getPosition().getValue();
+        //lastLeft = m_leftFront.getPosition().getValue();
         stepTime = Timer.getFPGATimestamp() - stepTime;
       }
     }
