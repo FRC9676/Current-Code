@@ -97,7 +97,7 @@ public class Robot extends TimedRobot {
     m_Elevator = new SparkMax(ElevatorID, MotorType.kBrushless);
     m_intakeBottom = new SparkMax(intakeBottomID, MotorType.kBrushless);
     m_intakeTop = new SparkMax(intakeTopID, MotorType.kBrushless);
-    //m_intake = new SparkMax(intake, MotorType.kBrushless);
+    m_intake = new SparkMax(intake, MotorType.kBrushless);
     //m_climber = new SparkMax(climberID, MotorType.kBrushless);
 
     //robot setup
@@ -112,8 +112,8 @@ public class Robot extends TimedRobot {
 
     //kraken limits
     m_currentLim.SupplyCurrentLimit = 1;
-    //m_currentLim.SupplyCurrentThreshold = 4;
-    //m_currentLim.SupplyTimeThreshold = 1.0;
+    m_currentLim.SupplyCurrentThreshold = 4;
+    m_currentLim.SupplyTimeThreshold = 1.0;
     m_currentLim.StatorCurrentLimitEnable = true;
   }
 
@@ -126,8 +126,8 @@ public class Robot extends TimedRobot {
    static double fwd;//drivetrain forward var
    static double rot;//drivetrain rotation var
 
-   //Intake motor controller
-   /* public void setIntake(double percent){
+    Intake motor controller
+    public void setIntake(double percent){
     m_Elevator.set(percent);
 
     if(intakeOn == true){//intake setting
@@ -139,30 +139,30 @@ public class Robot extends TimedRobot {
     }else{
       m_intake.set(0);
     }
-  } */
+  } 
 
   @Override
   public void robotPeriodic() {}
 
   //auton vars
-  //double autoTimeStart; //the time auton is started
-  //double timeRun; //the time auton has run
-  //double stepTime; //the time the last step stopped
+  double autoTimeStart; //the time auton is started
+  double timeRun; //the time auton has run
+  double stepTime; //the time the last step stopped
 
-  //double posTargetLeft;
-  //double posTargetRight;
-  //double leftPos;
-  //double rightPos;
-  //double var;
-  //double leftSpeed; //sets the left speed
-  //double rightSpeed; //sets the right speed
-  //double lastLeft;
-  //double lastRight;
-  //int step;
+  double posTargetLeft;
+  double posTargetRight;
+  double leftPos;
+  double rightPos;
+  double var;
+  double leftSpeed; //sets the left speed
+  double rightSpeed; //sets the right speed
+  double lastLeft;
+  double lastRight;
+  int step;
 
   //8.46 gear ratio
   //18.84 inches per revolution
- /*  public void setDist(int right, int left) {
+    public void setDist(int right, int left) {
     posTargetRight = ((right/18.84)*8.46) + lastRight;
     posTargetLeft = ((left/18.84)*8.46) + lastLeft;
 
@@ -237,8 +237,8 @@ public class Robot extends TimedRobot {
     step = step + 1;
     stepTime = Timer.getFPGATimestamp() - stepTime;
   }
- */
-  /* @Override
+ 
+   @Override
   public void autonomousInit() {
     System.out.println("Auto selected: " + m_autoSelected);
     autoTimeStart = Timer.getFPGATimestamp();
@@ -249,7 +249,7 @@ public class Robot extends TimedRobot {
     step = 0;
     lastLeft = 0;
     lastRight = 0;
-  } */
+  } 
 //EVERYTHING BELOW THIS IS OVERRIDE
   /** This function is called periodically during autonomous. */
   @Override
@@ -275,8 +275,8 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("Elevator", elevatorEncoder.getPosition());
     SmartDashboard.putNumber("Y", -j_Driver.getY());
     SmartDashboard.putNumber("X", -j_Driver.getX());
-    //SmartDashboard.putBoolean("Laser", laser.get());
-    //SmartDashboard.putBoolean("Laser2", laser2.get());
+    SmartDashboard.putBoolean("Laser", laser.get());
+    SmartDashboard.putBoolean("Laser2", laser2.get());
     //SmartDashboard.putNumber("Shooter", shooterSpeed);
     elevatorPos = elevatorEncoder.getPosition();
     //kraken stuff
@@ -335,7 +335,7 @@ public class Robot extends TimedRobot {
 
     //button mappings based on https://github.com/mandlifrc/GearsBotF310
     //HOPE THEY WORK!!!!!!!!!!
-    /* if(j_Elevator.getRawButton(3)){
+     if(j_Elevator.getRawButton(3)){
       elevator_preset = 1;
     }else if(j_Elevator.getRawButton(1)){
       elevator_preset = 2;
@@ -386,7 +386,7 @@ public class Robot extends TimedRobot {
       }
     }else{
       m_Elevator.set(0);
-    } */
+    } 
   }
   /** This function is called once when the robot is disabled. */
   @Override
