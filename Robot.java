@@ -97,7 +97,7 @@ public class Robot extends TimedRobot {
     m_Elevator = new SparkMax(ElevatorID, MotorType.kBrushless);
     m_intakeBottom = new SparkMax(intakeBottomID, MotorType.kBrushless);
     m_intakeTop = new SparkMax(intakeTopID, MotorType.kBrushless);
-    //m_intake = new SparkMax(intake, MotorType.kBrushless);
+    m_intake = new SparkMax(intake, MotorType.kBrushless);
     //m_climber = new SparkMax(climberID, MotorType.kBrushless);
 
     //robot setup
@@ -112,8 +112,8 @@ public class Robot extends TimedRobot {
 
     //kraken limits
     m_currentLim.SupplyCurrentLimit = 1;
-   // m_currentLim.SupplyCurrentThreshold = 4;
-    //m_currentLim.SupplyTimeThreshold = 1.0;
+    m_currentLim.SupplyCurrentThreshold = 4;
+    m_currentLim.SupplyTimeThreshold = 1.0;
     m_currentLim.StatorCurrentLimitEnable = true;
   }
 
@@ -190,8 +190,8 @@ public class Robot extends TimedRobot {
     if(leftSpeed == 0){
       if(rightSpeed == 0){
         step = step + 1;
-        //lastRight = m_rightFront.getPosition().getValue();
-        //lastLeft = m_leftFront.getPosition().getValue();
+        lastRight = m_rightFront.getPosition().getValue();
+        lastLeft = m_leftFront.getPosition().getValue();
         stepTime = Timer.getFPGATimestamp() - stepTime;
       }
     }
@@ -226,8 +226,8 @@ public class Robot extends TimedRobot {
     if(leftSpeed == 0){
       if(rightSpeed == 0){
         step = step + 1;
-        //lastRight = m_rightFront.getPosition().getValue();
-        //lastLeft = m_leftFront.getPosition().getValue();
+        lastRight = m_rightFront.getPosition().getValue();
+        lastLeft = m_leftFront.getPosition().getValue();
         stepTime = Timer.getFPGATimestamp() - stepTime;
       }
     }
@@ -262,7 +262,7 @@ public class Robot extends TimedRobot {
   /** This function is called once when teleop is enabled. */
   @Override
   public void teleopInit() {
-    //encoder.reset();
+    encoder.reset();
     elevatorEncoder = m_Elevator.getEncoder();
     elevatorHome = elevatorEncoder.getPosition();
   }
@@ -277,7 +277,7 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("X", -j_Driver.getX());
     SmartDashboard.putBoolean("Laser", laser.get());
     SmartDashboard.putBoolean("Laser2", laser2.get());
-    //SmartDashboard.putNumber("Shooter", shooterSpeed);
+    SmartDashboard.putNumber("Shooter", shooterSpeed);
     elevatorPos = elevatorEncoder.getPosition();
     //kraken stuff
     m_myRobot.arcadeDrive(-j_Driver.getY()*.25, -j_Driver.getX()*.25);
